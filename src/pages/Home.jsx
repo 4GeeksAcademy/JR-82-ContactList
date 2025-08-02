@@ -27,8 +27,8 @@ try {
     console.error("Error creating agenda:", error);
 }
 }
-   
-   const fetchContacts = async () => {
+
+const fetchContacts = async () => {
   try {
     const response = await fetch(`https://playground.4geeks.com/contact/agendas/${agendaSlug}`);
     const data = await response.json();

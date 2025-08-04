@@ -1,0 +1,30 @@
+.container {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  border: 1px solid black;
+  background-color: rgb(116, 190, 116);
+}
+
+#contact-component {
+  background-color: rgb(116, 190, 116);
+}
+
+#back-button {
+    margin-left: 75px;
+}
+
+h2 {
+    text-align: center;
+    color: rgb(0, 0, 0);
+    margin-right: 45px;
+}
+
+body {
+    background-color: lightgray;
+}
+
+form {
+  width: 50%;
+  margin: 0 auto;
+}

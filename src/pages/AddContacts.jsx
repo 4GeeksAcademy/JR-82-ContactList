@@ -1,112 +1,115 @@
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
 
 export const AddContacts = () => {
-  const { id } = useParams();
   const { store, dispatch } = useGlobalReducer();
-  const agendaSlug = "morbing";
+  const { theId } = useParams();
   const navigate = useNavigate();
 
   // Find the contact in the store if editing, otherwise use empty fields
-  const editingContact = id
-    ? store.contacts.find((c) => String(c.id) === String(id))
-    : null;
-
-  const [contact, setContact] = useState(
+  const editingContact = store.contacts?.find((c) => String(c.id) === String(theId));
+  const [form, setForm] = useState(
     editingContact || { name: "", email: "", phone: "", address: "" }
   );
 
+  // If editing, update form state when store changes
   useEffect(() => {
-    if (editingContact) setContact(editingContact);
+    if (editingContact) setForm(editingContact);
   }, [editingContact]);
 
-  const AddTheContacts = async (e) => {
+  const handleChange = e => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
-
-    const body = {
-      name: contact.name, // <-- FIXED HERE
-      email: contact.email,
-      phone: contact.phone,
-      address: contact.address,
-      agenda_slug: agendaSlug,
-    };
-
-    const response = await fetch(
-      `https://playground.4geeks.com/contact/agendas/${agendaSlug}/contacts`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+    if (theId) {
+      // EDIT: PUT request
+      const response = await fetch(
+        `https://playground.4geeks.com/contact/agendas/morbing/contacts/${theId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        }
+      );
+      if (response.ok) {
+        const updated = await response.json();
+        dispatch({ type: "edit_contact", payload: updated });
+        navigate("/");
+      } else {
+        alert("Failed to update contact");
       }
-    );
-
-    let data = {};
-    try {
-      data = await response.json();
-    } catch (err) {
-      data = { message: "No JSON response" };
-    }
-    console.log("Response status:", response.status, "Response data:", data);
-    if (data.detail) {
-      alert("API error: " + JSON.stringify(data.detail));
-    }
-
-    if (response.ok) {
-      navigate("/");
     } else {
-      alert("Failed to add contact. " + (data.message || "Please check your input."));
+      // CREATE: POST request
+      const response = await fetch(
+        `https://playground.4geeks.com/contact/agendas/morbing/contacts`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...form, agenda_slug: "morbing" }),
+        }
+      );
+      if (response.ok) {
+        const created = await response.json();
+        dispatch({ type: "add_contact", payload: created });
+        navigate("/");
+      } else {
+        alert("Failed to create contact");
+      }
     }
   };
 
   return (
-    <form onSubmit={AddTheContacts}>
-      <div>
-        <label htmlFor="fullName">Full Name</label>
-        <br />
+    <div className="container">
+      <form onSubmit={handleSubmit} >
+        <h2>{theId ? "Edit Contact" : "Add Contact"}</h2>
         <input
-          id="fullName"
-          type="text"
-          value={contact.name}
-          onChange={(e) => setContact({ ...contact, name: e.target.value })}
-        />
-        <br />
-        <label htmlFor="email">Email</label>
-        <br />
-        <input
-          id="email"
-          type="text"
-          value={contact.email}
-          onChange={(e) => setContact({ ...contact, email: e.target.value })}
-        />
-        <br />
-        <label htmlFor="phone">Phone</label>
-        <br />
-        <input
-          id="phone"
-          type="text"
-          value={contact.phone}
-          onChange={(e) => setContact({ ...contact, phone: e.target.value })}
-        />
-        <br />
-        <label htmlFor="address">Address</label>
-        <br />
-        <input
-          id="address"
-          type="text"
-          value={contact.address}
-          onChange={(e) => setContact({ ...contact, address: e.target.value })}
-        />
-        <br />
-        <button type="submit">Add Contact</button>
-        <br />
-        <Link to="/">
-          <button type="button">Back to Contact List</button>
-        </Link>
-      </div>
+          name="name"
+          value={form.name}
+        onChange={handleChange}
+        placeholder="Full Name"
+        style={{ width: `${Math.max(30, form.name.length)}ch` }}
+        required
+      />
+      <br />
+      <br />
+      <input
+        name="email"
+        value={form.email}
+        onChange={handleChange}
+        placeholder="Email"
+        style={{ width: `${Math.max(30, form.email.length)}ch` }}
+        required
+      />
+      <br />
+      <br />
+      <input
+        name="phone"
+        value={form.phone}
+        onChange={handleChange}
+        placeholder="Phone"
+        style={{ width: `${Math.max(30, form.phone.length)}ch` }}
+        required
+      />
+      <br />
+      <br />
+      <input
+        name="address"
+        value={form.address}
+        onChange={handleChange}
+        placeholder="Address"
+        style={{ width: `${Math.max(30, form.address.length)}ch` }}
+        required
+      />
+      <br />
+      <br />
+      <button type="submit">{theId ? "Update" : "Create"}</button>
+      <Link to="/">
+        <button id="back-button" type="button">Back to Contact List</button>
+      </Link>
     </form>
+    </div>
   );
 };

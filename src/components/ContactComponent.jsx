@@ -80,7 +80,7 @@ const ContactComponent = () => {
   }
 
   return (
-    <div>
+    <div id="contact-component">
       {store.contacts.map((contact, idx) => (
         <div
           key={`${contact.id || contact.email || idx}`}

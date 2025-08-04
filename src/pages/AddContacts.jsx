@@ -1,25 +1,35 @@
-import useGlobalReducer from "../hooks/useGlobalReducer";
+import { useParams } from "react-router-dom";
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
 
 export const AddContacts = () => {
+  const { id } = useParams();
   const { store, dispatch } = useGlobalReducer();
   const agendaSlug = "morbing";
   const navigate = useNavigate();
 
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
+  // Find the contact in the store if editing, otherwise use empty fields
+  const editingContact = id
+    ? store.contacts.find((c) => String(c.id) === String(id))
+    : null;
+
+  const [contact, setContact] = useState(
+    editingContact || { name: "", email: "", phone: "", address: "" }
+  );
+
+  useEffect(() => {
+    if (editingContact) setContact(editingContact);
+  }, [editingContact]);
 
   const AddTheContacts = async (e) => {
     e.preventDefault();
 
     const body = {
-      name: fullName, // <-- FIXED HERE
-      email: email,
-      phone: phone,
-      address: address,
+      name: contact.name, // <-- FIXED HERE
+      email: contact.email,
+      phone: contact.phone,
+      address: contact.address,
       agenda_slug: agendaSlug,
     };
 
@@ -60,8 +70,8 @@ export const AddContacts = () => {
         <input
           id="fullName"
           type="text"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
+          value={contact.name}
+          onChange={(e) => setContact({ ...contact, name: e.target.value })}
         />
         <br />
         <label htmlFor="email">Email</label>
@@ -69,8 +79,8 @@ export const AddContacts = () => {
         <input
           id="email"
           type="text"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={contact.email}
+          onChange={(e) => setContact({ ...contact, email: e.target.value })}
         />
         <br />
         <label htmlFor="phone">Phone</label>
@@ -78,8 +88,8 @@ export const AddContacts = () => {
         <input
           id="phone"
           type="text"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          value={contact.phone}
+          onChange={(e) => setContact({ ...contact, phone: e.target.value })}
         />
         <br />
         <label htmlFor="address">Address</label>
@@ -87,8 +97,8 @@ export const AddContacts = () => {
         <input
           id="address"
           type="text"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
+          value={contact.address}
+          onChange={(e) => setContact({ ...contact, address: e.target.value })}
         />
         <br />
         <button type="submit">Add Contact</button>

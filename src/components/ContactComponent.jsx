@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import { Link } from "react-router-dom";
 
 const ContactComponent = () => {
   const { store, dispatch } = useGlobalReducer();
@@ -89,9 +90,11 @@ const ContactComponent = () => {
           <div>Email: {contact.email}</div>
           <div>Phone: {contact.phone}</div>
           <div>Address: {contact.address}</div>
-          <button onClick={() => EditContact(contact)}>
+         <Link to={`/addcontacts/${contact.id}`}>
+         <button>
             Edit
           </button>
+          </Link>
           <button onClick={() => RemoveContacts(contact)}>
             Delete
           </button>
